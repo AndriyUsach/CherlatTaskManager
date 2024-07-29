@@ -7,12 +7,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.AnchoredDraggableState
 import androidx.compose.foundation.gestures.DraggableAnchors
-import androidx.compose.foundation.gestures.DraggableAnchorsConfig
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,7 +32,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -72,38 +69,16 @@ fun TaskSwipeButton(
         R.string.drag_to_done
     }
 
+    val indicatorIconRes = if (reversed) R.drawable.ic_close else R.drawable.ic_done
+    val indicatorColor = if (reversed) AccentViolet else AccentGreen
+    val indicatorTint = if (reversed) Color.White else BlackIconTint
+
     val density = LocalDensity.current
-
-    val draggableState = remember {
-        AnchoredDraggableState(
-            initialValue = DragAnchors.Start,
-            positionalThreshold = { distance: Float -> distance * 0.5f },
-            velocityThreshold = { with(density) { 100.dp.toPx() } },
-            animationSpec = tween()
-        )
-    }
-
-    LaunchedEffect(key1 = draggableState.currentValue) {
-        if (draggableState.currentValue == DragAnchors.End) {
-            onSwipe()
-        }
-    }
 
     val indicatorSize = 60.dp
     val indicatorSizePx = with(density) { indicatorSize.toPx() }
 
-    val alpha by remember {
-        derivedStateOf {
-            val progress = draggableState.progress
-            if (draggableState.currentValue == DragAnchors.Start) {
-                if (progress == 1f) 1f else (1f - (progress * 1.5f)).coerceAtLeast(0f)
-            } else {
-                progress
-            }
-        }
-    }
-    
-    Box(
+    BoxWithConstraints(
         contentAlignment = Alignment.Center,
         modifier = modifier
             .fillMaxWidth()
@@ -111,21 +86,47 @@ fun TaskSwipeButton(
             .clip(CircleShape)
             .background(Color.White)
             .border(1.dp, GreyStroke, CircleShape)
-            .onSizeChanged { layoutSize ->
+    ) {
+
+        val draggableState = remember {
+            AnchoredDraggableState(
+                initialValue = DragAnchors.Start,
+                positionalThreshold = { distance: Float -> distance * 0.5f },
+                velocityThreshold = { with(density) { 100.dp.toPx() } },
+                animationSpec = tween()
+            ).apply {
+                val layoutWidth = with(density) { maxWidth.toPx() }
                 val anchors: DraggableAnchors<DragAnchors> = if (reversed) {
                     DraggableAnchors {
-                        DragAnchors.Start at layoutSize.width - indicatorSizePx
+                        DragAnchors.Start at layoutWidth - indicatorSizePx
                         DragAnchors.End at 0f
                     }
                 } else {
                     DraggableAnchors {
                         DragAnchors.Start at 0f
-                        DragAnchors.End at layoutSize.width - indicatorSizePx
+                        DragAnchors.End at layoutWidth - indicatorSizePx
                     }
                 }
-                draggableState.updateAnchors(anchors)
+                updateAnchors(anchors)
             }
-    ) {
+        }
+
+        LaunchedEffect(key1 = draggableState.currentValue) {
+            if (draggableState.currentValue == DragAnchors.End) {
+                onSwipe()
+            }
+        }
+
+        val alpha by remember {
+            derivedStateOf {
+                val progress = draggableState.progress
+                if (draggableState.currentValue == DragAnchors.Start) {
+                    if (progress == 1f) 1f else (1f - (progress * 1.5f)).coerceAtLeast(0f)
+                } else {
+                    progress
+                }
+            }
+        }
 
         Box(
             contentAlignment = Alignment.Center,
@@ -164,10 +165,11 @@ fun TaskSwipeButton(
             )
 
         }
+
         SwipeIndicator(
-            iconRes = if (reversed) R.drawable.ic_close else R.drawable.ic_done,
-            color = if (reversed) AccentViolet else AccentGreen,
-            tint = if (reversed) Color.White else BlackIconTint,
+            iconRes = indicatorIconRes,
+            color = indicatorColor,
+            tint = indicatorTint,
             modifier = Modifier
                 .align(Alignment.CenterStart)
                 .offset {
@@ -181,7 +183,6 @@ fun TaskSwipeButton(
                 .anchoredDraggable(draggableState, Orientation.Horizontal)
         )
     }
-
 }
 
 @Composable
