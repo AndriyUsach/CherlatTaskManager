@@ -1,6 +1,8 @@
 package com.cherlat.taskmanager.navigation
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -14,7 +16,8 @@ enum class Screens {
 
 @Composable
 fun NavigationHost(
-    navController: NavHostController
+    navController: NavHostController,
+    paddings: PaddingValues
 ) {
 
     NavHost(
@@ -23,7 +26,7 @@ fun NavigationHost(
     ) {
 
         composable(Screens.Home.name) {
-            HomeScreen()
+            HomeScreen(paddings)
         }
 
         composable(Screens.Settings.name) {
