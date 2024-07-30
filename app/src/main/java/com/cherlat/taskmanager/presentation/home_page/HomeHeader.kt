@@ -1,6 +1,7 @@
 package com.cherlat.taskmanager.presentation.home_page
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -62,6 +63,12 @@ fun HomeHeader(
             .padding(top = 8.dp)
     ) {
 
+        val progressState by animateFloatAsState(
+            targetValue = progress,
+            animationSpec = tween(400),
+            label = "anim_progress"
+        )
+
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -88,7 +95,7 @@ fun HomeHeader(
                 )
 
                 Text(
-                    text = getAnnotatedStringForProgress(progress),
+                    text = getAnnotatedStringForProgress(progressState),
                     color = AccentViolet,
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.alignByBaseline(),
@@ -96,12 +103,8 @@ fun HomeHeader(
 
             }
 
-            val progressState by animateFloatAsState(
-                targetValue = progress
-            )
-
             LinearProgressIndicator(
-                progress = progressState,
+                progress = { progressState },
                 trackColor = AccentViolet.copy(alpha = 0.3f),
                 color = AccentViolet,
                 strokeCap = StrokeCap.Round,

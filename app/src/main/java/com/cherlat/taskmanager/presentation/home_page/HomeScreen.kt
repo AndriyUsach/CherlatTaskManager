@@ -1,5 +1,6 @@
 package com.cherlat.taskmanager.presentation.home_page
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -19,7 +20,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.cherlat.taskmanager.data.fakeTaskData
 import com.cherlat.taskmanager.presentation.components.TaskActiveCard
 import com.cherlat.taskmanager.presentation.components.TaskCompletedCard
 import com.cherlat.taskmanager.ui.theme.CherlatTaskManagerTheme
@@ -39,7 +39,8 @@ fun HomeScreen(
             .fillMaxSize()
     ) {
         HomeHeader(
-            modifier = Modifier.padding(top = paddingValues.calculateTopPadding())
+            modifier = Modifier.padding(top = paddingValues.calculateTopPadding()),
+            progress = uiState.progress
         )
 
         Surface(
@@ -63,7 +64,7 @@ fun HomeScreen(
                     )
                 }
 
-                items(uiState.tasks, key = { it.id }) {
+                items(uiState.todo, key = { it.id }) {
                     TaskActiveCard(
                         task = it,
                         modifier = Modifier.padding(vertical = 4.dp)
@@ -71,14 +72,6 @@ fun HomeScreen(
                         viewModel.markTaskAsDone(it)
                     }
                 }
-//                fakeTaskData.tasks.forEach {
-//                    item {
-//                        TaskActiveCard(
-//                            task = it,
-//                            modifier = Modifier.padding(vertical = 4.dp)
-//                        )
-//                    }
-//                }
 
                 item {
                     Text(
@@ -97,15 +90,6 @@ fun HomeScreen(
                         viewModel.markTaskAsUndone(it)
                     }
                 }
-
-//                fakeTaskData.completedTasks.forEach {
-//                    item {
-//                        TaskCompletedCard(
-//                            task = it,
-//                            modifier = Modifier.padding(vertical = 4.dp)
-//                        )
-//                    }
-//                }
 
             }
         }
